@@ -15,6 +15,7 @@ import com.google.api.services.calendar.CalendarScopes;
 import com.google.api.services.gmail.Gmail;
 import com.google.api.services.gmail.GmailScopes;
 import com.google.api.services.gmail.model.Message;
+import com.prodoscore.services.google.utils.Authorization;
 import org.apache.commons.codec.binary.Base64;
 
 import javax.mail.MessagingException;
@@ -34,43 +35,12 @@ public class GMailService {
     public GMailService() throws GeneralSecurityException, IOException {
         NetHttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         GsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-        service = new Gmail.Builder(httpTransport, jsonFactory, getCredentials(httpTransport, jsonFactory))
+        service = new Gmail.Builder(httpTransport, jsonFactory, Authorization.getCredentials(httpTransport, jsonFactory))
                 .setApplicationName("Test Mailer")
                 .build();
     }
 
-    /**
-     * Creates an authorized Credential object.
-     *
-     * @param httpTransport The network HTTP Transport.
-     * @return An authorized Credential object.
-     * @throws IOException If the credentials.json file cannot be found.
-     */
-    private static Credential getCredentials(final NetHttpTransport httpTransport, GsonFactory jsonFactory)
-            throws IOException {
-        // Load client secrets.
-        InputStream in = GMailService.class.getResourceAsStream("/oauth_credential.json");
-        if (in == null) {
-            throw new FileNotFoundException("Resource not found: " + "/oauth_credential.json");
-        }
-        GoogleClientSecrets clientSecrets =
-                GoogleClientSecrets.load(jsonFactory, new InputStreamReader(in));
-
-        // Build flow and trigger user authorization request.
-        GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, jsonFactory, clientSecrets, Set.of(GmailScopes.GMAIL_SEND, CalendarScopes.CALENDAR))
-                .setDataStoreFactory(new FileDataStoreFactory(Paths.get("tokens").toFile()))
-                .setAccessType("offline")
-                .build();
-        LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-        //returns an authorized Credential object.
-        return new AuthorizationCodeInstalledApp(flow, receiver).authorize("user");
-    }
-
-    public void sendMail(String subject, String message) throws GeneralSecurityException, IOException, MessagingException {
-
-        // Send email
-
+    public void sendMail(String subject, String message) throws IOException, MessagingException {
         // Encode as MIME message
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
