@@ -9,6 +9,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.calendar.CalendarScopes;
+import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.gmail.GmailScopes;
 import com.prodoscore.services.google.GMailService;
 
@@ -39,7 +40,7 @@ public class Authorization {
 
         // Build flow and trigger user authorization request.
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, jsonFactory, clientSecrets, Set.of(GmailScopes.GMAIL_SEND, CalendarScopes.CALENDAR))
+                httpTransport, jsonFactory, clientSecrets, Set.of(GmailScopes.GMAIL_SEND, CalendarScopes.CALENDAR, DriveScopes.DRIVE))
                 .setDataStoreFactory(new FileDataStoreFactory(Paths.get("tokens").toFile()))
                 .setAccessType("offline")
                 .build();
